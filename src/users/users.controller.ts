@@ -13,11 +13,13 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { SpecificQuerry } from './dto/specific-querry.dto';
+import { Public } from 'src/auth/decorators/public.decorators';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Public()
   @HttpCode(201)
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
@@ -29,6 +31,7 @@ export class UsersController {
     };
   }
 
+  @Public()
   @Get()
   async findAll() {
     const res = await this.usersService.findAll();
@@ -39,6 +42,7 @@ export class UsersController {
     };
   }
 
+  @Public()
   @Get()
   async findOne(@Query() querry: SpecificQuerry) {
     const res = await this.usersService.findOne(querry);
@@ -49,6 +53,7 @@ export class UsersController {
     };
   }
 
+  @Public()
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     const res = await this.usersService.update(+id, updateUserDto);
@@ -59,6 +64,7 @@ export class UsersController {
     };
   }
 
+  @Public()
   @HttpCode(204)
   @Delete(':id')
   async remove(@Param('id') id: string) {

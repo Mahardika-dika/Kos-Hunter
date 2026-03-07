@@ -13,7 +13,6 @@ export class UsersService {
     private readonly bcrypt: BcryptService,
   ) {}
 
-  // This function is created to create users, and has a password hashing function to protect user security.
   async create(createUserDto: CreateUserDto) {
     const comparePassword = await this.bcrypt.hashPassword(
       createUserDto.password,
@@ -85,7 +84,6 @@ export class UsersService {
     }
   }
 
-  // This function is created to retrieve all data from users and return it in the form of a JSON object.
   async findAll() {
     try {
       const find = await this.prisma.users.findMany({});
@@ -154,7 +152,6 @@ export class UsersService {
     }
   }
 
-  // This function is created to retrieve specific users using a Query (id, name, and email), and return them according to the given Query.
   async findOne(querry: SpecificQuerry) {
     try {
       const where: Prisma.UsersWhereInput = {};
@@ -245,7 +242,6 @@ export class UsersService {
     }
   }
 
-  // This function is designed to update user data. Using the user ID parameter, users can update any data that is not in accordance with the user's ID.
   async update(id: number, updateUserDto: UpdateUserDto) {
     try {
       const updt = await this.prisma.users.update({
@@ -351,7 +347,6 @@ export class UsersService {
     }
   }
 
-  // This function is created to delete data from users via their Params (id), this is done when the user no longer needs the application or wants to create a new account.
   async remove(id: number) {
     try {
       const delt = await this.prisma.users.delete({ where: { id } });

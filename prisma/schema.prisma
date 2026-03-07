@@ -22,7 +22,6 @@ model Users {
   phone    String?
   role     Role?
 
-  // Table Relation
   kos     Kos[]
   reviews Reviews[]
   books   Books[]
@@ -36,7 +35,6 @@ model Kos {
   price_per_month Int
   gender          Gender?
 
-  // Table Relation
   user Users @relation(fields: [user_id], references: [id])
 
   kosImages     KosImage[]
@@ -50,7 +48,6 @@ model KosImage {
   kos_id Int
   file   String
 
-  // Table Relation
   kos Kos @relation(fields: [kos_id], references: [id])
 }
 
@@ -59,7 +56,6 @@ model KosFasilities {
   kos_id   Int
   fasility Json
 
-  // Table Relation
   kos Kos @relation(fields: [kos_id], references: [id])
 }
 
@@ -69,7 +65,6 @@ model Reviews {
   comment String
   user_id Int
 
-  // Table Relation
   kos  Kos   @relation(fields: [kos_id], references: [id])
   user Users @relation(fields: [user_id], references: [id])
 }
@@ -81,7 +76,6 @@ model Books {
   start_date DateTime
   end_date   DateTime?
 
-  // Table Relation
   kos  Kos   @relation(fields: [kos_id], references: [id])
   user Users @relation(fields: [user_id], references: [id])
 }

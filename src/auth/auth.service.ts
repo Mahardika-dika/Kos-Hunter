@@ -71,7 +71,7 @@ export class AuthService {
         id: Payload.id,
         name: Payload.name,
         email: Payload.email,
-        role: Payload.role,
+        ...(Payload.role && { role: Payload.role }),
         token,
       };
     } catch (error) {
