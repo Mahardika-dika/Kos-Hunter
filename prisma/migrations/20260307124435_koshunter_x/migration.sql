@@ -2,7 +2,7 @@
 CREATE TYPE "Role" AS ENUM ('OWNER', 'SOCIETY', 'ADMIN');
 
 -- CreateEnum
-CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE');
+CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE', 'ALL');
 
 -- CreateEnum
 CREATE TYPE "Status" AS ENUM ('ACCEPTED', 'PENDING', 'REJECT');
@@ -14,7 +14,7 @@ CREATE TABLE "Users" (
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "phone" TEXT,
-    "role" "Role",
+    "role" "Role" NOT NULL,
 
     CONSTRAINT "Users_pkey" PRIMARY KEY ("id")
 );
@@ -26,7 +26,8 @@ CREATE TABLE "Kos" (
     "name" TEXT NOT NULL,
     "address" TEXT NOT NULL,
     "price_per_month" INTEGER NOT NULL,
-    "gender" "Gender",
+    "gender" "Gender" NOT NULL,
+    "description" TEXT NOT NULL,
 
     CONSTRAINT "Kos_pkey" PRIMARY KEY ("id")
 );

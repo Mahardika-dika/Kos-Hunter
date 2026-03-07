@@ -9,7 +9,6 @@ import {
   IsOptional,
   IsPhoneNumber,
   IsString,
-  IsStrongPassword,
 } from 'class-validator';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
@@ -23,7 +22,6 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   email!: string;
 
   @IsString({ message: 'The Password property must be filled with a string.' })
-  @IsStrongPassword({ minLength: 5, minUppercase: 1, minNumbers: 1 })
   @IsOptional()
   password!: string;
 

@@ -18,6 +18,18 @@ export class UsersService {
       createUserDto.password,
     );
     try {
+      if (createUserDto.role === undefined) {
+        throw new HttpException(
+          {
+            message: "You don't have permision to be ADMIN",
+            success: false,
+            data: null,
+            error: 'UNAUTHORIZED',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
       const create = await this.prisma.users.create({
         data: { ...createUserDto, password: comparePassword },
       });
@@ -44,7 +56,7 @@ export class UsersService {
       return userSafe;
     } catch (error) {
       if (error instanceof HttpException) {
-        return error;
+        throw error;
       }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         switch (error.code) {
@@ -122,7 +134,7 @@ export class UsersService {
       });
     } catch (error) {
       if (error instanceof HttpException) {
-        return error;
+        throw error;
       }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         switch (error.code) {
@@ -208,7 +220,7 @@ export class UsersService {
     } catch (error) {
       console.log(error);
       if (error instanceof HttpException) {
-        return error;
+        throw error;
       }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         switch (error.code) {
@@ -297,7 +309,7 @@ export class UsersService {
       });
     } catch (error) {
       if (error instanceof HttpException) {
-        return error;
+        throw error;
       }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         switch (error.code) {
@@ -364,7 +376,7 @@ export class UsersService {
       }
     } catch (error) {
       if (error instanceof HttpException) {
-        return error;
+        throw error;
       }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         switch (error.code) {

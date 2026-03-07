@@ -6,7 +6,6 @@ import {
   IsOptional,
   IsPhoneNumber,
   IsString,
-  IsStrongPassword,
 } from 'class-validator';
 import { PublicRole } from 'src/common/enums/public-role.enums';
 import { normalizePublicRole } from 'src/common/utils/role.utils';
@@ -22,7 +21,6 @@ export class CreateUserDto {
   email!: string;
 
   @IsString({ message: 'The Password property must be filled with a string.' })
-  @IsStrongPassword({ minLength: 5, minUppercase: 1, minNumbers: 1 })
   @IsNotEmpty({ message: 'The password property cannot be empty' })
   password!: string;
 
@@ -36,5 +34,5 @@ export class CreateUserDto {
     message: 'The role property must be filled with the options provided.',
   })
   @IsOptional()
-  role?: PublicRole;
+  role!: PublicRole;
 }

@@ -20,7 +20,7 @@ model Users {
   email    String  @unique
   password String
   phone    String?
-  role     Role?
+  role     Role
 
   kos     Kos[]
   reviews Reviews[]
@@ -28,12 +28,13 @@ model Users {
 }
 
 model Kos {
-  id              Int     @id @default(autoincrement())
+  id              Int    @id @default(autoincrement())
   user_id         Int
   name            String
   address         String
   price_per_month Int
-  gender          Gender?
+  gender          Gender
+  description     String
 
   user Users @relation(fields: [user_id], references: [id])
 
@@ -89,6 +90,7 @@ enum Role {
 enum Gender {
   MALE
   FEMALE
+  ALL
 }
 
 enum Status {
