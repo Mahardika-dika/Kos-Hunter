@@ -15,43 +15,52 @@ datasource db {
 }
 
 model Users {
-  id       Int       @id @default(autoincrement())
+  id       Int     @id @default(autoincrement())
   name     String
-  email    String    @unique
+  email    String  @unique
   password String
-  phone    String
+  phone    String?
   role     Role?
-  kos      Kos[]
-  reviews  Reviews[]
-  books    Books[]
+
+  // Table Relation
+  kos     Kos[]
+  reviews Reviews[]
+  books   Books[]
 }
 
 model Kos {
-  id              Int             @id @default(autoincrement())
+  id              Int     @id @default(autoincrement())
   user_id         Int
   name            String
   address         String
   price_per_month Int
   gender          Gender?
-  user            Users           @relation(fields: [user_id], references: [id])
-  kosImages       KosImage[]
-  kosFasilities   KosFasilities[]
-  reviews         Reviews[]
-  books           Books[]
+
+  // Table Relation
+  user Users @relation(fields: [user_id], references: [id])
+
+  kosImages     KosImage[]
+  kosFasilities KosFasilities[]
+  reviews       Reviews[]
+  books         Books[]
 }
 
 model KosImage {
   id     Int    @id @default(autoincrement())
   kos_id Int
   file   String
-  kos    Kos    @relation(fields: [kos_id], references: [id])
+
+  // Table Relation
+  kos Kos @relation(fields: [kos_id], references: [id])
 }
 
 model KosFasilities {
   id       Int  @id @default(autoincrement())
   kos_id   Int
   fasility Json
-  kos      Kos  @relation(fields: [kos_id], references: [id])
+
+  // Table Relation
+  kos Kos @relation(fields: [kos_id], references: [id])
 }
 
 model Reviews {
@@ -59,8 +68,10 @@ model Reviews {
   kos_id  Int
   comment String
   user_id Int
-  kos     Kos    @relation(fields: [kos_id], references: [id])
-  user    Users  @relation(fields: [user_id], references: [id])
+
+  // Table Relation
+  kos  Kos   @relation(fields: [kos_id], references: [id])
+  user Users @relation(fields: [user_id], references: [id])
 }
 
 model Books {
@@ -69,8 +80,10 @@ model Books {
   user_id    Int
   start_date DateTime
   end_date   DateTime?
-  kos        Kos       @relation(fields: [kos_id], references: [id])
-  user       Users     @relation(fields: [user_id], references: [id])
+
+  // Table Relation
+  kos  Kos   @relation(fields: [kos_id], references: [id])
+  user Users @relation(fields: [user_id], references: [id])
 }
 
 enum Role {

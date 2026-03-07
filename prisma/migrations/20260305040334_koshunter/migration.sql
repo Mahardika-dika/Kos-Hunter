@@ -13,7 +13,7 @@ CREATE TABLE "Users" (
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "phone" TEXT NOT NULL,
+    "phone" TEXT,
     "role" "Role",
 
     CONSTRAINT "Users_pkey" PRIMARY KEY ("id")
