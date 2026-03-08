@@ -16,13 +16,15 @@ export class KosService {
     createKoDto: CreateKoDto,
     file: Express.Multer.File,
   ) {
-    const description = await this.AI.generateDescription({
-      name: createKoDto.name,
-      location: createKoDto.address,
-      price: createKoDto.price_per_month,
-      facilities: createKoDto.fasility,
-      gender: createKoDto.gender,
-    });
+    const description: string = createKoDto.ai
+      ? await this.AI.generateDescription({
+          name: createKoDto.name,
+          location: createKoDto.address,
+          price: createKoDto.price_per_month,
+          facilities: createKoDto.fasility,
+          gender: createKoDto.gender,
+        })
+      : createKoDto.description;
 
     try {
       const add = await this.prisma.kos.create({

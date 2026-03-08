@@ -65,6 +65,7 @@ CREATE TABLE "Books" (
     "id" SERIAL NOT NULL,
     "kos_id" INTEGER NOT NULL,
     "user_id" INTEGER NOT NULL,
+    "status" "Status" NOT NULL DEFAULT 'PENDING',
     "start_date" TIMESTAMP(3) NOT NULL,
     "end_date" TIMESTAMP(3),
 
@@ -73,6 +74,15 @@ CREATE TABLE "Books" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "KosFasilities_kos_id_key" ON "KosFasilities"("kos_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Reviews_user_id_key" ON "Reviews"("user_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Books_user_id_key" ON "Books"("user_id");
 
 -- AddForeignKey
 ALTER TABLE "Kos" ADD CONSTRAINT "Kos_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "Users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

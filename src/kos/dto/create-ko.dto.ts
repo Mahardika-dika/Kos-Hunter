@@ -1,6 +1,13 @@
 import { $Enums } from '@prisma/client';
 import { Transform } from 'class-transformer';
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateKoDto {
   @IsString()
@@ -20,6 +27,10 @@ export class CreateKoDto {
   @IsNotEmpty()
   gender!: $Enums.Gender;
 
+  @IsString()
+  @IsOptional()
+  description!: string;
+
   @Transform(({ value }): string[] => {
     if (typeof value === 'string') {
       return JSON.parse(value) as string[];
@@ -28,4 +39,9 @@ export class CreateKoDto {
   })
   @IsNotEmpty()
   fasility!: string[];
+
+  @Transform(({ value }) => value === 'true')
+  @IsBoolean()
+  @IsNotEmpty()
+  ai!: boolean;
 }

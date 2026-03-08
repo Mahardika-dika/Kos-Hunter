@@ -23,8 +23,8 @@ model Users {
   role     Role
 
   kos     Kos[]
-  reviews Reviews[]
-  books   Books[]
+  reviews Reviews?
+  books   Books?
 }
 
 model Kos {
@@ -39,7 +39,7 @@ model Kos {
   user Users @relation(fields: [user_id], references: [id])
 
   kosImages     KosImage[]
-  kosFasilities KosFasilities[]
+  kosFasilities KosFasilities?
   reviews       Reviews[]
   books         Books[]
 }
@@ -54,7 +54,7 @@ model KosImage {
 
 model KosFasilities {
   id       Int  @id @default(autoincrement())
-  kos_id   Int
+  kos_id   Int  @unique
   fasility Json
 
   kos Kos @relation(fields: [kos_id], references: [id])
@@ -64,7 +64,7 @@ model Reviews {
   id      Int    @id @default(autoincrement())
   kos_id  Int
   comment String
-  user_id Int
+  user_id Int    @unique
 
   kos  Kos   @relation(fields: [kos_id], references: [id])
   user Users @relation(fields: [user_id], references: [id])
@@ -73,7 +73,8 @@ model Reviews {
 model Books {
   id         Int       @id @default(autoincrement())
   kos_id     Int
-  user_id    Int
+  user_id    Int       @unique
+  status     Status    @default(PENDING)
   start_date DateTime
   end_date   DateTime?
 
