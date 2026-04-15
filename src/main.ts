@@ -15,13 +15,29 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('Library API')
-    .setDescription('Backend API Sistem Perpustakaan')
-    .setVersion('1.0')
-    .addBearerAuth()
+    .setTitle('Kos Hunter API')
+    .setDescription(
+      'Dokumentasi API Kos Hunter untuk autentikasi, user management, kos, booking, dan review.',
+    )
+    .setVersion('1.0.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Masukkan access token JWT tanpa prefix Bearer.',
+      },
+      'access-token',
+    )
     .build();
+
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+      displayRequestDuration: true,
+    },
+  });
 
   await app.listen(process.env.PORT ?? 3000);
 }
