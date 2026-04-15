@@ -1,8 +1,8 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateBookDto } from './create-book.dto';
-import { $Enums } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { IsOptional, IsNumber, IsEnum, IsDate } from 'class-validator';
+import { $Enums } from 'generated/prisma/browser';
 
 export class UpdateBookDto extends PartialType(CreateBookDto) {
   @IsOptional()
