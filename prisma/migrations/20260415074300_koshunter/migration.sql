@@ -36,7 +36,7 @@ CREATE TABLE "Kos" (
 CREATE TABLE "KosImage" (
     "id" SERIAL NOT NULL,
     "kos_id" INTEGER NOT NULL,
-    "file" TEXT NOT NULL,
+    "file" JSONB NOT NULL,
 
     CONSTRAINT "KosImage_pkey" PRIMARY KEY ("id")
 );
@@ -74,6 +74,9 @@ CREATE TABLE "Books" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "KosImage_kos_id_key" ON "KosImage"("kos_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "KosFasilities_kos_id_key" ON "KosFasilities"("kos_id");

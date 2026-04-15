@@ -2,8 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { BcryptService } from 'src/bcrypt/bcrypt.service';
+import { BcryptService } from 'src/common/bcrypt/bcrypt.service';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './guard/role.guard';
 
@@ -20,7 +19,6 @@ import { RolesGuard } from './guard/role.guard';
   providers: [
     { provide: APP_GUARD, useClass: RolesGuard },
     AuthService,
-    PrismaService,
     BcryptService,
   ],
 })

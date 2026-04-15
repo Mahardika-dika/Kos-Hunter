@@ -1,4 +1,3 @@
-import { $Enums } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import {
   IsBoolean,
@@ -8,6 +7,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { $Enums } from 'generated/prisma/browser';
 
 export class CreateKoDto {
   @IsString()

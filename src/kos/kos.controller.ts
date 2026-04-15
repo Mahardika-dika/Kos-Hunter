@@ -1,27 +1,26 @@
 import {
   Controller,
-  // Get,
+  Get,
   Post,
   Body,
   UploadedFile,
-  Param,
   UseInterceptors,
-  // Patch,
-  // Param,
-  // Delete,
+  Patch,
+  Param,
+  Delete,
 } from '@nestjs/common';
 import { KosService } from './kos.service';
 import { CreateKoDto } from './dto/create-ko.dto';
-import { Public } from 'src/auth/decorators/public.decorators';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from 'src/common/config/multer.config';
-// import { UpdateKoDto } from './dto/update-ko.dto';
+import { UpdateKoDto } from './dto/update-ko.dto';
+import { Roles } from 'src/auth/decorators/role.decorators';
 
 @Controller('kos')
 export class KosController {
   constructor(private readonly kosService: KosService) {}
 
-  @Public()
+  @Roles()
   @Post('addKos/:user_id')
   @UseInterceptors(FileInterceptor('file', multerConfig))
   async create(
@@ -32,23 +31,31 @@ export class KosController {
     return await this.kosService.create(+user_id, createKoDto, file);
   }
 
-  // @Get()
-  // async findAll() {
-  //   return await this.kosService.findAll();
-  // }
+  @Roles()
+  @Get()
+  async findAll() {
+    return await this.kosService.findAll();
+  }
 
-  // @Get(':id')
-  // async findOne(@Param('id') id: string) {
-  //   return await this.kosService.findOne(+id);
-  // }
+  @Roles()
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return await this.kosService.findOne(+id);
+  }
 
-  // @Patch(':id')
-  // async update(@Param('id') id: string, @Body() updateKoDto: UpdateKoDto) {
-  //   return await this.kosService.update(+id, updateKoDto);
-  // }
+  @Roles()
+  @Patch(':id')
+  @UseInterceptors(FileInterceptor('file', multerConfig))
+  async update(
+    @Param('user_id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() updateKoDto: UpdateKoDto,
+  ) {
+    return await this.kosService.update(+id, updateKoDto, file);
+  }
 
-  // @Delete(':id')
-  // async remove(@Param('id') id: string) {
-  //   return await this.kosService.remove(+id);
-  // }
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    return await this.kosService.remove(+id);
+  }
 }

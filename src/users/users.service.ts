@@ -1,10 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { BcryptService } from 'src/bcrypt/bcrypt.service';
-import { Prisma } from '@prisma/client';
+import { PrismaService } from 'src/common/prisma/prisma.service';
+import { BcryptService } from 'src/common/bcrypt/bcrypt.service';
 import { SpecificQuerry } from './dto/specific-querry.dto';
+import { Prisma } from 'generated/prisma/client';
+import { prismaErrors } from 'src/common/utils/prisma_errors.utils';
 
 @Injectable()
 export class UsersService {
@@ -14,14 +15,13 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const comparePassword = await this.bcrypt.hashPassword(
-      createUserDto.password,
-    );
+    const hashPassword = await this.bcrypt.hashPassword(createUserDto.password);
+
     try {
       if (createUserDto.role === undefined) {
         throw new HttpException(
           {
-            message: "You don't have permision to be ADMIN",
+            message: "You don't have permision",
             success: false,
             data: null,
             error: 'UNAUTHORIZED',
@@ -31,7 +31,8 @@ export class UsersService {
       }
 
       const create = await this.prisma.users.create({
-        data: { ...createUserDto, password: comparePassword },
+        data: { ...createUserDto, password: hashPassword },
+        select: { id: true, name: true, email: true, phone: true, role: true },
       });
 
       if (!create) {
@@ -45,52 +46,14 @@ export class UsersService {
           HttpStatus.BAD_REQUEST,
         );
       }
-      const userSafe = {
-        id: create.id,
-        name: create.name,
-        email: create.email,
-        ...(create.phone && { phone: create.phone }),
-        ...(create.role && { role: create.role }),
-      };
 
-      return userSafe;
+      return create;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        switch (error.code) {
-          case 'P2002':
-            throw new HttpException(
-              {
-                message: 'E-mail is already used!, use another',
-                success: false,
-                data: null,
-                error: 'DATA_CONFLICT',
-              },
-              HttpStatus.CONFLICT,
-            );
-          case 'P2024':
-            throw new HttpException(
-              {
-                message: 'Connection pool timeout',
-                success: false,
-                data: null,
-                error: 'CONNECTION_TIMEOUT',
-              },
-              HttpStatus.GATEWAY_TIMEOUT,
-            );
-          default:
-            throw new HttpException(
-              {
-                message: 'Database error!, try again later',
-                success: false,
-                data: null,
-                error: 'DATABSE_ERROR',
-              },
-              HttpStatus.BAD_REQUEST,
-            );
-        }
+        throw await prismaErrors(error);
       }
       console.log(error);
     }
@@ -98,20 +61,11 @@ export class UsersService {
 
   async findAll() {
     try {
-      const find = await this.prisma.users.findMany({});
+      const find = await this.prisma.users.findMany({
+        select: { id: true, name: true, email: true, phone: true, role: true },
+      });
 
-      if (!find) {
-        throw new HttpException(
-          {
-            message: 'Failed to showing data!, Try again later',
-            success: false,
-            data: null,
-            error: 'NOT_FOUND',
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      if (find.length === 0) {
+      if (!find || find.length === 0) {
         throw new HttpException(
           {
             message: 'Data is empty!, Nothing to display',
@@ -123,42 +77,13 @@ export class UsersService {
         );
       }
 
-      return find.map((x) => {
-        return {
-          id: x.id,
-          name: x.name,
-          email: x.email,
-          ...(x.phone && { phone: x.phone }),
-          ...(x.role && { role: x.role }),
-        };
-      });
+      return find;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        switch (error.code) {
-          case 'P2024':
-            throw new HttpException(
-              {
-                message: 'Connection pool timeout',
-                success: false,
-                data: null,
-                error: 'CONNECTION_TIMEOUT',
-              },
-              HttpStatus.GATEWAY_TIMEOUT,
-            );
-          default:
-            throw new HttpException(
-              {
-                message: 'Database Error!, try again later',
-                success: false,
-                data: null,
-                error: 'DATABASE_ERROR',
-              },
-              HttpStatus.BAD_REQUEST,
-            );
-        }
+        throw await prismaErrors(error);
       }
       console.log(error);
     }
@@ -168,23 +93,16 @@ export class UsersService {
     try {
       const where: Prisma.UsersWhereInput = {};
 
-      if (querry.id) {
-        where.id = Number(querry.id);
-      }
-      if (querry.name) {
-        where.name = {
-          contains: querry.name,
-          mode: 'insensitive',
-        };
-      }
-      if (querry.email) {
-        where.email = {
-          contains: querry.email,
-          mode: 'insensitive',
-        };
-      }
+      if (querry.id) where.id = Number(querry.id);
+      if (querry.name)
+        where.name = { contains: querry.name, mode: 'insensitive' };
+      if (querry.email)
+        where.email = { contains: querry.email, mode: 'insensitive' };
 
-      const findSpecific = await this.prisma.users.findMany({ where });
+      const findSpecific = await this.prisma.users.findFirst({
+        where,
+        select: { id: true, name: true, email: true, phone: true, role: true },
+      });
 
       if (!findSpecific) {
         throw new HttpException(
@@ -197,59 +115,15 @@ export class UsersService {
           HttpStatus.BAD_REQUEST,
         );
       }
-      if (findSpecific.length === 0) {
-        throw new HttpException(
-          {
-            message: 'Data is empty!, Nothing to display',
-            success: false,
-            data: null,
-            error: 'NOT_FOUND',
-          },
-          HttpStatus.NOT_FOUND,
-        );
-      }
-      return findSpecific.map((x) => {
-        return {
-          id: x.id,
-          name: x.name,
-          email: x.email,
-          ...(x.phone && { phone: x.phone }),
-          ...(x.role && { role: x.role }),
-        };
-      });
+
+      return findSpecific;
     } catch (error) {
       console.log(error);
       if (error instanceof HttpException) {
         throw error;
       }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        switch (error.code) {
-          case 'P2001':
-            throw new HttpException(
-              {
-                message: 'Failed to showing data!',
-                success: false,
-                data: null,
-                error: 'NOT_FOUND',
-              },
-              HttpStatus.NOT_FOUND,
-            );
-          case 'P2024':
-            throw new HttpException(
-              {
-                message: 'Connection pool timeout',
-                success: false,
-                data: null,
-                error: 'CONNECTION_TIMEOUT',
-              },
-              HttpStatus.GATEWAY_TIMEOUT,
-            );
-          default:
-            throw new HttpException(
-              { message: 'Database Error!, try again later' },
-              HttpStatus.BAD_REQUEST,
-            );
-        }
+        throw await prismaErrors(error);
       }
     }
   }
@@ -259,6 +133,7 @@ export class UsersService {
       const updt = await this.prisma.users.update({
         where: { id },
         data: updateUserDto,
+        select: { id: true, name: true, email: true, phone: true, role: true },
       });
 
       if (!updt) {
@@ -273,87 +148,13 @@ export class UsersService {
         );
       }
 
-      const find = await this.prisma.users.findMany({ where: { id } });
-
-      if (!find) {
-        throw new HttpException(
-          {
-            message: 'Failed to showing data!, Try again later',
-            success: false,
-            data: null,
-            error: 'NOT_FOUND',
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      if (find.length === 0) {
-        throw new HttpException(
-          {
-            message: 'Data is empty!, Nothing to display',
-            success: false,
-            data: null,
-            error: 'NOT_FOUND',
-          },
-          HttpStatus.NOT_FOUND,
-        );
-      }
-
-      return find.map((x) => {
-        return {
-          id: x.id,
-          name: x.name,
-          email: x.email,
-          ...(x.phone && { phone: x.phone }),
-          ...(x.role && { role: x.role }),
-        };
-      });
+      return updt;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        switch (error.code) {
-          case 'P2001':
-            throw new HttpException(
-              {
-                message: 'Data not found!, try another one',
-                success: false,
-                data: null,
-                error: 'NOT_FOUND',
-              },
-              HttpStatus.NOT_FOUND,
-            );
-          case 'P2024':
-            throw new HttpException(
-              {
-                message: 'Connection pool timeout',
-                success: false,
-                data: null,
-                error: 'CONNECTION_TIMEOUT',
-              },
-              HttpStatus.GATEWAY_TIMEOUT,
-            );
-          case 'P2002 ':
-            throw new HttpException(
-              {
-                message: 'E - Mail has been used!, try another one',
-                success: false,
-                data: null,
-                error: 'DATA_CONFLICT',
-              },
-              HttpStatus.CONFLICT,
-            );
-          default:
-            throw new HttpException(
-              {
-                message: 'Database Error!, try again later',
-                success: false,
-                data: null,
-                error: 'DATABASE_ERROR',
-              },
-              HttpStatus.BAD_REQUEST,
-            );
-        }
+        throw await prismaErrors(error);
       }
       console.log(error);
     }
@@ -379,48 +180,7 @@ export class UsersService {
         throw error;
       }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        switch (error.code) {
-          case 'P2025':
-            throw new HttpException(
-              {
-                message: 'Data record not found!',
-                success: false,
-                data: null,
-                error: 'NOT_FOUND',
-              },
-              HttpStatus.NOT_FOUND,
-            );
-          case 'P2001':
-            throw new HttpException(
-              {
-                message: "Can't found that data! try again later",
-                success: false,
-                data: null,
-                error: 'NOT_FOUND',
-              },
-              HttpStatus.NOT_FOUND,
-            );
-          case 'P2024':
-            throw new HttpException(
-              {
-                message: 'Connection pool timeout',
-                success: false,
-                data: null,
-                error: 'CONNECTION_TIMEOUT',
-              },
-              HttpStatus.GATEWAY_TIMEOUT,
-            );
-          default:
-            throw new HttpException(
-              {
-                message: 'Database Error!, try again later',
-                success: false,
-                data: null,
-                error: 'DATABASE_ERROR',
-              },
-              HttpStatus.BAD_REQUEST,
-            );
-        }
+        throw await prismaErrors(error);
       }
       console.log(error);
     }

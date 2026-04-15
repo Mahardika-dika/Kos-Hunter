@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { AuthenticationDto } from './dto/authentication.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { BcryptService } from 'src/bcrypt/bcrypt.service';
+import { PrismaService } from 'src/common/prisma/prisma.service';
+import { BcryptService } from 'src/common/bcrypt/bcrypt.service';
 import { JwtService } from '@nestjs/jwt';
-import { Prisma } from '@prisma/client';
+import { Prisma } from 'generated/prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -76,7 +76,7 @@ export class AuthService {
       };
     } catch (error) {
       if (error instanceof HttpException) {
-        return error;
+        throw error;
       }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         switch (error.code) {

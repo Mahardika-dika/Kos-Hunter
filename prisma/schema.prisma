@@ -1,17 +1,17 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client-js"
-  // output   = "../generated/prisma"
+  provider      = "prisma-client"
+  output        = "../generated/prisma"
+  moduleFormat  = "cjs"
+  compilerBuild = "fast"
 }
 
 datasource db {
   provider = "postgresql"
-  // url      = env("DATABASE_URL")
 }
 
 model Users {
@@ -23,8 +23,8 @@ model Users {
   role     Role
 
   kos     Kos[]
-  reviews Reviews?
-  books   Books?
+  reviews Reviews[]
+  books   Books[]
 }
 
 model Kos {
@@ -36,20 +36,25 @@ model Kos {
   gender          Gender
   description     String
 
-  user Users @relation(fields: [user_id], references: [id])
+  user Users @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   kosImages     KosImage[]
   kosFasilities KosFasilities?
   reviews       Reviews[]
   books         Books[]
+
+  @@index([user_id])
+  @@index([gender, price_per_month])
 }
 
 model KosImage {
-  id     Int    @id @default(autoincrement())
-  kos_id Int
-  file   String
+  id     Int  @id @default(autoincrement())
+  kos_id Int  @unique
+  file   Json
 
-  kos Kos @relation(fields: [kos_id], references: [id])
+  kos Kos @relation(fields: [kos_id], references: [id], onDelete: Cascade)
+
+  @@index([kos_id])
 }
 
 model KosFasilities {
@@ -57,29 +62,35 @@ model KosFasilities {
   kos_id   Int  @unique
   fasility Json
 
-  kos Kos @relation(fields: [kos_id], references: [id])
+  kos Kos @relation(fields: [kos_id], references: [id], onDelete: Cascade)
 }
 
 model Reviews {
   id      Int    @id @default(autoincrement())
   kos_id  Int
   comment String
-  user_id Int    @unique
+  user_id Int?
 
-  kos  Kos   @relation(fields: [kos_id], references: [id])
-  user Users @relation(fields: [user_id], references: [id])
+  kos  Kos    @relation(fields: [kos_id], references: [id], onDelete: Cascade)
+  user Users? @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@unique([user_id, kos_id])
+  @@index([kos_id])
 }
 
 model Books {
   id         Int       @id @default(autoincrement())
   kos_id     Int
-  user_id    Int       @unique
+  user_id    Int
   status     Status    @default(PENDING)
   start_date DateTime
   end_date   DateTime?
 
   kos  Kos   @relation(fields: [kos_id], references: [id])
   user Users @relation(fields: [user_id], references: [id])
+
+  @@index([user_id])
+  @@index([kos_id])
 }
 
 enum Role {
